@@ -142,3 +142,64 @@ The private key `ashburn.pem` was securely copied from the local host into the .
 ![ping_priv_instance](./US_East_Region/ping_priv_instance.png)
 
 ![auhthetication_success](./US_East_Region/ssh_priv_instance.png)
+
+
+# Inter-Region VPC Peering
+
+### 14. Create a VPC peering connection
+
+VPC pering connection between `london-euston-cloud` VPC and `north-virginia-cloud` VPC
+- Connection Name: `transatlantic`
+- Requester CIDRs: 11.0.0.0/16
+- Accepter CIDRs: 15.0.0.0/16
+
+![VPC_peering](./vpc_peering/peering_request.png)
+
+
+### 15. VPC Pering connection accepted
+
+![peering_accepted](./vpc_peering/connection_accepted.png)
+
+
+### 16. Adding a Route to N.Virginia CIDRs 
+
+A route was added to the `n-virginia-cloud` IP address range from the private route table in `london-euston-cloud` VPC using the peering connection ID as target.
+
+- Destination: 15.0.0.0/16
+- Target: pcx-0fd42c2ed0c819a4a
+
+![added_route1](./vpc_peering/route_to_n_virginia.png)
+
+
+  ### 17. Add a Route to london CIDRs
+
+A route was added to the `london-euston-cloud` IP address range from the private route table in `n-virginia-cloud` VPC using the peering connection ID as target.
+
+- Destination: 11.0.0.0/16
+- Target: pcx-0fd42c2ed0c819a4a
+  
+![added_route2](./vpc_peering/route_to_london.png)
+
+
+### 18. Modification of security groups
+
+The private security group in the London region was modified to:
+- Allow All ICMP IPv4 traffic from `n-virginia-cloud` IP `15.0.0.0/16`
+- Allow SSH traffic from the private instance in n-virginia-cloud
+
+![sec_group1](./vpc_peering/sec_group_london.png)
+
+
+The private security group in the N.Virginia region was modified to:
+- Allow All ICMP IPv4 traffic to `london-euston-cloud` IP `11.0.0.0/16`
+- Allow SSH traffic to the private instance in london-euston-cloud
+
+  
+![sec_group2](./vpc_peering/sec_group_n_virginia.png)
+
+
+### 19. Ping London region Private Instance from N.Virginia Private Instance
+
+A succesful ping request was sent to `fortune-priv-instance` (IP address: 11.0.128.27) in the `london-euston-cloud` from ` n-virginia-priv-instance` (IP address: 15.0.143.136) in `n-virginia-cloud` VPC.
+
+![ping](./vpc_peering/ping.png)
