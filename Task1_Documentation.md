@@ -68,7 +68,7 @@ This route entry allows communication between instances within the private subne
 ![key_pair](./London-region/key_pair.png)
 
 
-### 8. Create a security group with inbound rule to allow SSH from VPC IP address ranges 
+### 8. Create a security group with inbound rule to allow SSH from local host IP address
 
 ![sec_group1](./London-region/pub_sec.png)
 
@@ -78,3 +78,66 @@ This route entry allows communication between instances within the private subne
 ICMP (Internet Control Message Protocol) traffic is enabled to send error messages, operational information, diagnotic data e.g., to test network connectivity between instances using the ping command to send echo requests.
 
 ![sec_group2](./London-region/priv_sec.png)
+
+### 10. launch a free tier EC2 instance in the public subnet
+
+- Name: fortune-pub-instance
+- Software Image(AMI): Amazon Linux 2023 AMI
+- Virtual server type: t2.micro
+- Storage: 8Gib gp3 Root volume
+- VPC: london-euston-cloud
+- Subnet: canary-wharf-pub
+- Security group: london-euston-pub-security
+- key pair: shadwell.pem
+- Auto-assign public IP: Enable
+
+![pub_EC2](./London-region/pub_EC2.png)
+
+
+### 11. launch a free tier EC2 instance in the private subnet
+
+- Name: fortune-priv-instance
+- Software Image(AMI): Amazon Linux 2023 AMI
+- Virtual server type: t2.micro
+- Storage: 8Gib gp3 Root volume
+- VPC: london-euston-cloud
+- Subnet: canary-wharf-priv
+- Security group: london-euston-priv-security
+- key pair: shadwell.pem
+- Auto-assign public IP: Disable
+
+
+![priv_EC2](./London-region/priv_EC2.png)
+
+
+### 12. SSH from local host into public instance
+
+The keypair private key `shadwell.pem` was copied into the `.ssh` directory of the local linux pc to enable secure authentication with the public instance `fortune-pub-instance`.
+
+Due to inbound rule to allow SSH from the local host IP address set in the `london-euston-pub-security` security group, it was possible to ssh into the public EC2 instance. 
+
+![ssh_pub_instance](./London-region/ssh_pub_instance.png)
+
+### 13. Copy private key from local PC into the Public Instance 
+
+The private key `shadwell.pem` was securely copied from the local host into the .ssh directory of the public EC2 instance `fortune-pub-instance` to enable authentication with the private EC2 instance `fortune-priv-instance`.
+
+![copy_private key](./London-region/copy_key_pub_instance.png)
+
+### 14. Ping and SSH from public instance into private instance
+
+Lack of outbound SSH and ICMP traffic in the public security group `london-euston-pub-security` prevented ICMP echo request and SSH authentication from the IP address of the public EC2 instance into the private EC2 instance as shown in the picture below.
+
+![Failed_auhtnetication](./London-region/failed_ping.png)
+
+### 15. Modify public security group rule
+
+The public security group rule was modified to allow outbound SSH connections to instances in the private security group. Additionally, all ICMP IPv4 traffic was enabled.
+
+![rule_modification](./London-region/new_outbound_rule.png)
+
+
+As a result, SSH authentication and ping network packet requests were successful.
+
+![auhtnetication_success](./London-region/ping_success.png)
+
